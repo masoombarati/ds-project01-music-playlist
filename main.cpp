@@ -3,8 +3,10 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <limits>
 #include <map> 
+
+using namespace std;
+
 
 void loadCsvData(Playlist& playlist, const string& filename) {
     ifstream file(filename);
@@ -15,7 +17,7 @@ void loadCsvData(Playlist& playlist, const string& filename) {
         return;
     }
 
-    getline(file, line); 
+    getline(file, line);
 
     while (getline(file, line)) {
         stringstream ss(line);
@@ -27,11 +29,12 @@ void loadCsvData(Playlist& playlist, const string& filename) {
         getline(ss, date, ',');
         getline(ss, genre, ',');
         getline(ss, len_str, ',');
-        getline(ss, topic);
+        getline(ss, topic); 
 
         try {
             len = stoi(len_str);
-        } catch (...) {
+        }
+        catch (...) {
             len = 0;
         }
         playlist.addSong(artist, track, date, genre, len, topic);
@@ -41,19 +44,19 @@ void loadCsvData(Playlist& playlist, const string& filename) {
 }
 
 void showMenu() {
-    cout  << endl << "****** Music Playlist Manager ******" << endl;
+    cout << endl << "****** Music Playlist Manager ******" << endl;
     cout << "1. Create a new playlist" << endl;
     cout << "2. Delete a playlist" << endl;
     cout << "3. List all playlists" << endl;
     cout << "4. Add a song to a playlist" << endl;
     cout << "5. Delete a song from a playlist" << endl;
     cout << "6. Merge two playlists (A = A + B)" << endl;
-    cout << "7. Shuffle merge playlists (New = A + B...)" << endl; 
-    cout << "8. Filter a playlist" << endl; 
+    cout << "7. Shuffle merge playlists (New = A + B...)" << endl;
+    cout << "8. Filter a playlist" << endl;
     cout << "9. Sort a playlist" << endl;
-    cout << "10. Play a playlist (Normal)" << endl; 
+    cout << "10. Play a playlist (Normal)" << endl;
     cout << "11. Play a playlist (Shuffle)" << endl;
-    cout << "12. Like a song" << endl; 
+    cout << "12. Like a song" << endl;
     cout << "13. Dislike a song" << endl;
     cout << "q. Quit" << endl << endl;
     cout << "Enter your choice: ";
@@ -63,17 +66,16 @@ Playlist* promptAndFindPlaylist(map<string, Playlist>& playlists) {
     string name;
     cout << "Enter playlist name: ";
     getline(cin, name);
-    
+
     if (playlists.find(name) == playlists.end()) {
         cout << "Error: Playlist '" << name << "' not found." << endl;
         return nullptr;
     }
-    
     return &playlists.at(name);
 }
 
 Playlist* findPlaylist(map<string, Playlist>& playlists, const string& name) {
-     if (playlists.find(name) == playlists.end()) {
+    if (playlists.find(name) == playlists.end()) {
         cout << "Error: Playlist '" << name << "' not found." << endl;
         return nullptr;
     }
@@ -91,7 +93,7 @@ void createPlaylist(map<string, Playlist>& playlists) {
         cout << "Error: A playlist with this name already exists." << endl;
         return;
     }
-    
+
     playlists.emplace(name, Playlist(name));
     cout << "Playlist '" << name << "' created." << endl;
 }
@@ -112,14 +114,15 @@ void deletePlaylist(map<string, Playlist>& playlists) {
         return;
     }
 
-    playlists.erase(name); 
+    playlists.erase(name);
     cout << "Playlist '" << name << "' deleted." << endl;
 }
 
 void listPlaylists(map<string, Playlist>& playlists) {
     cout << "--- All Playlists ---" << endl;
-    for (auto const& [name, playlist] : playlists) {
-        cout << "- " << name << endl;
+    
+    for (map<string, Playlist>::const_iterator it = playlists.begin(); it != playlists.end(); ++it) {
+        cout << "- " << it->first << endl;
     }
     cout << "---------------------" << endl;
 }
@@ -131,9 +134,6 @@ void addSongToPlaylist(map<string, Playlist>& playlists) {
 
     string artist, track, date, genre, topic, len_str;
     int len;
-    
-    cout << "Press ENTER to begin...";
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     cout << "Enter track name: ";
     getline(cin, track);
@@ -148,7 +148,7 @@ void addSongToPlaylist(map<string, Playlist>& playlists) {
     cout << "Enter length (in seconds): ";
     getline(cin, len_str);
 
-    try { len = stoi(len_str); } 
+    try { len = stoi(len_str); }
     catch (...) { len = 0; }
 
     playlist->addSong(artist, track, date, genre, len, topic);
@@ -157,25 +157,24 @@ void addSongToPlaylist(map<string, Playlist>& playlists) {
 
 void deleteSongFromPlaylist(map<string, Playlist>& playlists) {
     cout << "--- Delete Song from Playlist ---" << endl;
-    Playlist* playlist = promptAndFindPlaylist(playlists); 
+    Playlist* playlist = promptAndFindPlaylist(playlists);
     if (playlist == nullptr) return;
 
     string trackName;
-
     cout << "Enter the exact track name to delete: ";
     getline(cin, trackName);
-    
+
     playlist->deleteSong(trackName);
 }
 
 void mergePlaylists(map<string, Playlist>& playlists) {
     cout << "--- Merge Two Playlists ---" << endl;
-    cout << "Enter name of playlist to merge INTO (e.g., Playlist A): " << endl;
-    Playlist* pA = promptAndFindPlaylist(playlists); 
+    cout << "Enter name of playlist to merge INTO (e.g., Playlist A): ";
+    Playlist* pA = promptAndFindPlaylist(playlists);
     if (pA == nullptr) return;
 
-    cout << "Enter name of playlist to merge FROM (e.g., Playlist B): " << endl;
-    Playlist* pB = promptAndFindPlaylist(playlists); 
+    cout << "Enter name of playlist to merge FROM (e.g., Playlist B): ";
+    Playlist* pB = promptAndFindPlaylist(playlists);
     if (pB == nullptr) return;
 
     if (pA->getName() == pB->getName()) {
@@ -183,20 +182,27 @@ void mergePlaylists(map<string, Playlist>& playlists) {
         return;
     }
 
-    pA->mergeTwoplaylist(*pB); 
+    pA->mergeTwoplaylist(*pB);
 }
 
 void shuffleMergePlaylists(map<string, Playlist>& playlists) {
     cout << "--- Shuffle Merge Playlists ---" << endl;
+    
+    static int mergeCounter = 1; 
     string newName;
-    cout << "Enter a name for your NEW merged playlist: ";
-    getline(cin, newName);
 
-    if (playlists.find(newName) != playlists.end()) {
-        cout << "Error: A playlist with this name already exists." << endl;
-        return;
+    while (true) {
+        stringstream ss;
+        ss << "merged " << mergeCounter;
+        newName = ss.str(); 
+
+        if (playlists.find(newName) == playlists.end()) {
+            break;
+        }
+        mergeCounter++;
     }
     
+    mergeCounter++; 
     playlists.emplace(newName, Playlist(newName));
     Playlist* newPlaylist = &playlists.at(newName);
     cout << "New playlist '" << newName << "' created." << endl;
@@ -206,7 +212,7 @@ void shuffleMergePlaylists(map<string, Playlist>& playlists) {
 
 void filterPlaylist(map<string, Playlist>& playlists) {
     cout << "--- Filter a Playlist ---" << endl;
-    Playlist* playlist = promptAndFindPlaylist(playlists); 
+    Playlist* playlist = promptAndFindPlaylist(playlists);
     if (playlist == nullptr) return;
 
     string filter_by, value;
@@ -225,15 +231,18 @@ void filterPlaylist(map<string, Playlist>& playlists) {
     getline(cin, value);
 
     Playlist filtered = playlist->filter(filter_by, value);
-
+    
     cout << "Enter a name for this new filtered playlist: ";
     string newName;
     getline(cin, newName);
+    
+    filtered.setName(newName); 
 
     if (playlists.find(newName) != playlists.end()) {
         cout << "A playlist with this name already exists. Overwriting." << endl;
         playlists.at(newName) = filtered;
-    } else {
+    }
+    else {
         playlists.emplace(newName, filtered);
     }
     cout << "Filtered playlist saved as '" << newName << "'." << endl;
@@ -241,9 +250,9 @@ void filterPlaylist(map<string, Playlist>& playlists) {
 
 void sortPlaylist(map<string, Playlist>& playlists) {
     cout << "--- Sort Playlist ---" << endl;
-    Playlist* playlist = promptAndFindPlaylist(playlists); 
+    Playlist* playlist = promptAndFindPlaylist(playlists);
     if (playlist == nullptr) return;
-    
+
     string sort_choice;
     cout << "Sort by (1) track, (2) artist, or (3) year (newest): ";
     getline(cin, sort_choice);
@@ -273,9 +282,10 @@ void likeASong(map<string, Playlist>& playlists) {
     Playlist& liked = playlists.at("Liked");
     if (liked.containsSong(trackName)) {
         cout << "Song is already in your 'Liked' playlist." << endl;
-    } else {
+    }
+    else {
         liked.addSong(song->artist_name, song->track_name, song->release_date,
-                      song->genre, song->len, song->topic);
+            song->genre, song->len, song->topic);
         cout << "'" << trackName << "' added to 'Liked' playlist." << endl;
     }
 }
@@ -294,72 +304,70 @@ void dislikeASong(map<string, Playlist>& playlists) {
 
 
 int main() {
-  
     map<string, Playlist> allPlaylists;
-    
+
     allPlaylists.emplace("All Songs", Playlist("All Songs"));
     allPlaylists.emplace("Liked", Playlist("Liked"));
-    
+
     loadCsvData(allPlaylists.at("All Songs"), "music.csv");
 
     string choice_str;
-    char choice;
 
     while (true) {
         showMenu();
-        getline(cin, choice_str);
-        
-        if (choice_str == "1") choice = '1';
-        else if (choice_str == "2") choice = '2';
-        else if (choice_str == "3") choice = '3';
-        else if (choice_str == "4") choice = '4';
-        else if (choice_str == "5") choice = '5';
-        else if (choice_str == "6") choice = '6';
-        else if (choice_str == "7") choice = '7'; 
-        else if (choice_str == "8") choice = '8'; 
-        else if (choice_str == "9") choice = '9'; 
-        else if (choice_str == "10") choice = '10'; 
-        else if (choice_str == "11") choice = '11'; 
-        else if (choice_str == "12") choice = '12';
-        else if (choice_str == "13") choice = '13'; 
-        else if (choice_str == "q" || choice_str == "Q") choice = 'q';
-        else choice = ' '; 
+        getline(cin, choice_str); 
 
-        cin.clear();
-
-        switch (choice) {
-            case '1': createPlaylist(allPlaylists); break;
-            case '2': deletePlaylist(allPlaylists); break;
-            case '3': listPlaylists(allPlaylists); break;
-            case '4': addSongToPlaylist(allPlaylists); break;
-            case '5': deleteSongFromPlaylist(allPlaylists); break; 
-            case '6': mergePlaylists(allPlaylists); break;
-            case '7': shuffleMergePlaylists(allPlaylists); break;
-            case '8': filterPlaylist(allPlaylists); break; 
-            case '9': sortPlaylist(allPlaylists); break; 
-            case '10': { 
-                cout << "--- Play Playlist (Normal) ---" << endl;
-                Playlist* p = promptAndFindPlaylist(allPlaylists); 
-                if (p) p->printPlaylist();
-                break;
-            }
-            case '11': { 
-                cout << "--- Play Playlist (Shuffle) ---" << endl;
-                Playlist* p = promptAndFindPlaylist(allPlaylists); 
-                if (p) p->playInShuffleMode();
-                break;
-            }
-            case '12': likeASong(allPlaylists); break; 
-            case '13': dislikeASong(allPlaylists); break; 
-            case 'q':
-                cout << "Goodbye!" << endl;
-                return 0;
-            default:
-                cout << "Invalid choice. Please try again." << endl;
-                break;
+        if (choice_str == "1") {
+            createPlaylist(allPlaylists);
+        }
+        else if (choice_str == "2") {
+            deletePlaylist(allPlaylists);
+        }
+        else if (choice_str == "3") {
+            listPlaylists(allPlaylists);
+        }
+        else if (choice_str == "4") {
+            addSongToPlaylist(allPlaylists);
+        }
+        else if (choice_str == "5") {
+            deleteSongFromPlaylist(allPlaylists);
+        }
+        else if (choice_str == "6") {
+            mergePlaylists(allPlaylists);
+        }
+        else if (choice_str == "7") {
+            shuffleMergePlaylists(allPlaylists);
+        }
+        else if (choice_str == "8") {
+            filterPlaylist(allPlaylists);
+        }
+        else if (choice_str == "9") {
+            sortPlaylist(allPlaylists);
+        }
+        else if (choice_str == "10") {
+            cout << "--- Play Playlist (Normal) ---" << endl;
+            Playlist* p = promptAndFindPlaylist(allPlaylists);
+            if (p) p->printPlaylist();
+        }
+        else if (choice_str == "11") {
+            cout << "--- Play Playlist (Shuffle) ---" << endl;
+            Playlist* p = promptAndFindPlaylist(allPlaylists);
+            if (p) p->playInShuffleMode();
+        }
+        else if (choice_str == "12") {
+            likeASong(allPlaylists);
+        }
+        else if (choice_str == "13") {
+            dislikeASong(allPlaylists);
+        }
+        else if (choice_str == "q" || choice_str == "Q") {
+            cout << "Goodbye!" << endl;
+            return 0; 
+        }
+        else {
+            cout << "Invalid choice. Please try again." << endl;
         }
     }
     return 0;
 }
-
 

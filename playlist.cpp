@@ -7,13 +7,14 @@ Playlist::Playlist(string playlist_name) {
 }
 
 void Playlist::addSong(string artist, string track, string date,
-                       string genre, int len, string topic) {
+    string genre, int len, string topic) {
 
     Song* newSong = new Song(artist, track, date, genre, len, topic);
-    
+
     if (head == nullptr) {
         head = newSong;
-    } else {
+    }
+    else {
         Song* temp = head;
         while (temp->next != nullptr) {
             temp = temp->next;
@@ -21,7 +22,7 @@ void Playlist::addSong(string artist, string track, string date,
         temp->next = newSong;
     }
 }
- 
+
 void Playlist::deleteSong(string track_name) {
     if (head == nullptr) {
         cout << "Playlist is empty! Cannot delete." << endl;
@@ -68,10 +69,10 @@ void Playlist::printPlaylist() {
 
     while (temp != nullptr) {
         cout << count << ". " << temp->track_name << " by "
-             << temp->artist_name << endl;
+            << temp->artist_name << endl;
         cout << "   Genre: " << temp->genre << " | Released: "
-             << temp->release_date << endl;
-             
+            << temp->release_date << endl;
+
         temp = temp->next;
         count++;
     }
@@ -94,21 +95,24 @@ void Playlist::sort(string sort_by) {
     std::sort(songs.begin(), songs.end(), [sort_by](Song* a, Song* b) {
         if (sort_by == "track") {
             return a->track_name < b->track_name;
-        } else if (sort_by == "artist") {
+        }
+        else if (sort_by == "artist") {
             if (a->artist_name != b->artist_name) {
                 return a->artist_name < b->artist_name;
-            } else {
+            }
+            else {
                 return a->track_name < b->track_name;
             }
-        } else if (sort_by == "year") {
-            return a->release_date > b->release_date; 
+        }
+        else if (sort_by == "year") {
+            return a->release_date > b->release_date;
         }
         return false;
-    });
+        });
 
     head = songs[0];
     for (size_t i = 0; i < songs.size() - 1; ++i) {
-        songs[i]->next = songs[i+1];
+        songs[i]->next = songs[i + 1];
     }
     songs.back()->next = nullptr;
 
@@ -135,7 +139,7 @@ void Playlist::playInShuffleMode() {
     cout << endl << "--- Playing Playlist: " << this->name << " (Shuffle Mode) ---" << endl;
     for (size_t i = 0; i < songs.size(); ++i) {
         cout << (i + 1) << ". " << songs[i]->track_name << " by "
-             << songs[i]->artist_name << endl;
+            << songs[i]->artist_name << endl;
     }
     cout << "-----------------------------------------------" << endl;
 }
@@ -151,50 +155,55 @@ bool Playlist::containsSong(string track_name) {
     return false;
 }
 
-void Playlist::mergeTwoplaylist(Playlist& other_playlist) {
+void Playlist::mergeTwoplaylist(Playlist& other_playlist, bool silent) {
     Song* otherHead = other_playlist.getHead();
     int count = 0;
 
     while (otherHead != nullptr) {
         if (!this->containsSong(otherHead->track_name)) {
-            this->addSong(otherHead->artist_name, otherHead->track_name, 
-                          otherHead->release_date, otherHead->genre, 
-                          otherHead->len, otherHead->topic);
+            this->addSong(otherHead->artist_name, otherHead->track_name,
+                otherHead->release_date, otherHead->genre,
+                otherHead->len, otherHead->topic);
             count++;
         }
         otherHead = otherHead->next;
     }
-    cout << "Successfully merged " << count << " new songs into " << this->name << "." << endl;
-    printPlaylist();
+
+    if (!silent) {
+        cout << "Successfully merged " << count << " new songs into " << this->name << "." << endl;
+        printPlaylist();
+    }
 }
 
 Playlist Playlist::filter(string filter_by, string value) {
-    Playlist filteredList("Filtered Results"); 
+    Playlist filteredList("Filtered Results");
     Song* temp = head;
     bool match = false;
 
     while (temp != nullptr) {
         match = false;
- 
+
         if (filter_by == "genre" && temp->genre == value) {
             match = true;
-        } else if (filter_by == "artist" && temp->artist_name == value) {
+        }
+        else if (filter_by == "artist" && temp->artist_name == value) {
             match = true;
-        } else if (filter_by == "year" && temp->release_date == value) {
+        }
+        else if (filter_by == "year" && temp->release_date == value) {
             match = true;
         }
 
         if (match) {
-            filteredList.addSong(temp->artist_name, temp->track_name, 
-                                 temp->release_date, temp->genre, 
-                                 temp->len, temp->topic);
+            filteredList.addSong(temp->artist_name, temp->track_name,
+                temp->release_date, temp->genre,
+                temp->len, temp->topic);
         }
         temp = temp->next;
     }
-    
+
     cout << "Filter complete. New playlist created with results." << endl;
-    filteredList.printPlaylist(); 
-    return filteredList; 
+    filteredList.printPlaylist();
+    return filteredList;
 }
 
 Song* Playlist::findSong(string track_name) {
@@ -205,8 +214,9 @@ Song* Playlist::findSong(string track_name) {
         }
         temp = temp->next;
     }
-    return nullptr; 
+    return nullptr;
 }
+
 
 void Playlist::shuffleMerge(map<string, Playlist>& allPlaylists) {
     string nameToAdd;
@@ -217,13 +227,15 @@ void Playlist::shuffleMerge(map<string, Playlist>& allPlaylists) {
 
         if (allPlaylists.find(nameToAdd) == allPlaylists.end()) {
             cout << "Error: Playlist '" << nameToAdd << "' not found." << endl;
-        } else {
+        }
+        else {
             Playlist& p = allPlaylists.at(nameToAdd);
-            
+
             if (p.getName() == this->name) {
                 cout << "Skipping: Cannot merge a playlist with itself." << endl;
-            } else {
-                this->mergeTwoplaylist(p);
+            }
+            else {
+                this->mergeTwoplaylist(p, true);
                 cout << "Merged '" << p.getName() << "'." << endl;
             }
         }
@@ -232,5 +244,4 @@ void Playlist::shuffleMerge(map<string, Playlist>& allPlaylists) {
     cout << "Shuffle merge complete for playlist '" << this->name << "'." << endl;
     this->printPlaylist();
 }
-
 

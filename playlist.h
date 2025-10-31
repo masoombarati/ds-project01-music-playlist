@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -19,8 +18,8 @@ struct Song {
     Song* next;
 
     Song(string artist, string track, string date,
-         string g, int length, string t) {
-        
+        string g, int length, string t) {
+
         this->artist_name = artist;
         this->track_name = track;
         this->release_date = date;
@@ -40,26 +39,26 @@ public:
     Playlist(string playlist_name);
 
     void addSong(string artist, string track, string date,
-                 string g, int length, string t);
+        string g, int length, string t);
 
     void deleteSong(string track_name);
 
     void printPlaylist();
 
-    void mergeTwoplaylist(Playlist& other_playlist); 
-    void shuffleMerge(map<string, Playlist>& allPlaylists); 
-    
+    void mergeTwoplaylist(Playlist& other_playlist, bool silent = false); 
+    void shuffleMerge(map<string, Playlist>& allPlaylists);
+
     void sort(string sort_by);
-    Playlist filter(string filter_by, string value); 
-    
-    Song* findSong(string track_name); 
-    
+    Playlist filter(string filter_by, string value);
+
+    Song* findSong(string track_name);
+
     void playInShuffleMode();
-    
+
+    void setName(string newName) { name = newName; }
+
     string getName() { return name; }
-    Song* getHead() { return head; } 
+    Song* getHead() { return head; }
     bool containsSong(string track_name);
 };
-
-
 
